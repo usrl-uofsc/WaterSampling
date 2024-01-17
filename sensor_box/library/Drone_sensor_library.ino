@@ -38,22 +38,22 @@ std_msgs::Int16 setMsg;
 std_msgs::Float32 temperature;                                // Set up data type for temp data message
 std_msgs::Float32 humidity;                                   // Set up data type for humidity data message
 std_msgs::String myErrorMsg;                                       // Set up error message
-std_msgs::UInt32 calibrationMsg;
-std_msgs::Int16 diagnostic;
+std_msgs::UInt32 calibrationMsg;				// Set up initiate calibration msg? WSchuler
+std_msgs::Int16 diagnostic;					// Set up initiate diagnostic msg? WSchuler	
 
 ros::Publisher fluorPub("sensor/fluor", &fluorMsg);             // Declare publisher of fluorescence data message on "sensor/fluor" topic
 ros::Publisher refPub("sensor/ref", &refMsg);                   // Declare publisher of reference data message on "sensor/ref" topic
 ros::Publisher scatPub("sensor/scat", &scatMsg);                   // Declare publisher of scattering data message on "sensor/scat" topic
-ros::Publisher ramanPub("sensor/raman", &ramanMsg);                   // Declare publisher of scattering data message on "sensor/scat" topic
-ros::Publisher setPub("sensor/settings", &setMsg);
+ros::Publisher ramanPub("sensor/raman", &ramanMsg);                   // Declare publisher of scattering data message on "sensor/scat" topic // Is this supposed to be "sensor/raman" instead of "sensor/scat"? WSchuler
+ros::Publisher setPub("sensor/settings", &setMsg);		     // Declare publisher of set data message on "set" topic? WSchuler
 ros::Publisher tempPub("sensor/temp", &temperature);                 // Declare publisher of temp data message on "temp" topic
 ros::Publisher humPub("sensor/humidity", &humidity);                 // Declare publisher of humidity data message on "humidity" topic
 ros::Publisher errorPub("sensor/error", &myErrorMsg);                     // Set up publisher of error topic
-ros::Publisher calibrationPub("sensor/calibration", &calibrationMsg);
-ros::Publisher diagnosticPub("sensor/diagnostic", &diagnostic);
+ros::Publisher calibrationPub("sensor/calibration", &calibrationMsg);	// Declare publisher of calibration data message on "calibration" topic? WSchuler
+ros::Publisher diagnosticPub("sensor/diagnostic", &diagnostic);		// Declare publisher of diagnostic data message on "diagnostic" topic? WSchuler
 
-unsigned long rosTimeout = ROS_TIMEOUT_DELAY;
-unsigned long tempTimeout = 1000;
+unsigned long rosTimeout = ROS_TIMEOUT_DELAY;				//returns nonegative data for ROS delay? WSchuler
+unsigned long tempTimeout = 1000;					//returns nonegative data for temperature timeout? WSchuler
 
 //------------------------------------------------------------------------------
 // Call back for file timestamps.  Only called for file create and sync().
@@ -76,14 +76,14 @@ void setup() {
     nh.advertise(fluorPub);        // Start advertising/publishing on "fluor_data" topic
     nh.advertise(refPub);          // Start advertising/publishing on "ref_data" topic
     nh.advertise(scatPub);          // Start advertising/publishing on "ref_data" topic
-    nh.advertise(ramanPub);
-    nh.advertise(setPub);
+    nh.advertise(ramanPub);	   // Start advertising/publishing on "sensor/scat" topic // Is this supposed to be "sensor/raman" instead of "sensor/scat"? WSchuler
+    nh.advertise(setPub);	   // Start advertising/publishing on "set" topic WSchuler
     nh.advertise(tempPub);         // Start advertising/publishing on "temp" topic
     nh.advertise(humPub);          // Start advertising/publishing on "humidity" topic
     nh.advertise(errorPub);        // Advertise error topic
-    nh.advertise(calibrationPub);
-    nh.advertise(diagnosticPub);
-    nh.subscribe(mode);            // Initialize subscriber to messages on "record" topic
+    nh.advertise(calibrationPub);  // Start advertising/publishing on "calibration' topic WSchuler
+    nh.advertise(diagnosticPub);  // Start advertising/publishing on "diagnotic" topic WSchuler
+    nh.subscribe(mode);            // Initialize subscriber to messages on "record" topic 
 #endif // !DEBUG
 
   // Set file timestamp callback
@@ -97,6 +97,7 @@ void setup() {
 	if (sensor.init()) { // initialize sensor
     sensor.setMode(2);
     #ifdef DEBUG
+// print a msg based on whether sensor initiates WSchuler
         Serial.println("Sensor.init success");
       }
       else {
@@ -116,14 +117,14 @@ void loop() {
 	Serial.println(F("Shutting down"));
       #endif // DEBUG
     }
-    #ifndef DEBUG
+    #ifndef DEBUG 
     if (sensor._errorCase) {
 	myErrorMsg.data = sensor.readErrors();
 	errorPub.publish(&myErrorMsg);
     }
     #endif // DEBUG
     
-    if (millis() > rosTimeout) {
+    if (millis() > rosTimeout) { // this case indicates an error and in respone updates the ROS WSchuler
       #ifdef DEBUG
         if (sensor._errorCase != 0) {
           Serial.println(sensor._errorCase);
@@ -132,12 +133,12 @@ void loop() {
         }
       #endif // DEBUG
       #ifndef DEBUG
-        nh.spinOnce();
+        nh.spinOnce();		// update ROS WSchuler
       #endif // !DEBUG
       rosTimeout = millis() + ROS_TIMEOUT_DELAY;
     } 
 
-    if (millis() > tempTimeout) {    // once per second, the sensor will read new temp and hum values and store them to the SD card
+    if (millis() > tempTimeout) {    // once per second, the sensor will read new temp and humidity values and store them to the SD card
       sensor.getHTS();
       temperature.data = sensor.HTSdata.temperature;
       humidity.data = sensor.HTSdata.humidity;
@@ -157,7 +158,7 @@ void loop() {
   }// end case 0
 	    
   // Record Mode (data)
-  case 1: {
+  case 1: { // Might be helpful to readers to explain what the case is? WSchuler
     Drone_sensor::ADC<3072> adc;
     adc.enableChannel(&fluorescence);
     adc.enableChannel(&reference);
@@ -185,7 +186,7 @@ void loop() {
       refMsg.data = adc.getData(&reference);
       scatMsg.data = adc.getData(&scattering);
 
-      if(adc.OOR_flag){
+      if(adc.OOR_flag){ 
         setMsg.data = (100*fluorescence.config.gain) + (10*reference.config.gain) + (scattering.config.gain);
         #ifndef DEBUG
           setPub.publish(&setMsg);
@@ -210,7 +211,7 @@ void loop() {
         nh.spinOnce();                  // update ROS
       #endif // !DEBUG
 
-      #ifdef DEBUG
+      #ifdef DEBUG 
         Serial.print("Data:\t");
         Serial.print(fluorMsg.data);
         Serial.print("\t");
@@ -227,7 +228,7 @@ void loop() {
   } // end case 1
 	    
   // Calibrate (cali)
-  case 2: {
+  case 2: { // Might be helpful to readers to explain what the case is? WSchuler
     #ifdef DEBUG
       Serial.println("Running calibration");
     #endif // DEBUG
