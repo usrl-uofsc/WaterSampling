@@ -51,7 +51,7 @@ bool Drone_sensor::start( bool laserState ) {
         NRF_SAADC->EVENTS_STARTED = 0;
     }
     if (NRF_SAADC->EVENTS_STARTED == 0) {
-        NRF_TIMER2->TASKS_CLEAR = 1;
+        NRF_TIMER2->TASKS_CLEAR = 1;    // clear timer WSchuler
         NRF_SAADC->TASKS_START = 1;      // start the SAADC
         NRF_SAADC->EVENTS_END = 0;
         while (NRF_SAADC->EVENTS_STARTED == 0);
