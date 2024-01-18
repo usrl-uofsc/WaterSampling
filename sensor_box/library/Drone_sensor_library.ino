@@ -254,7 +254,7 @@ void loop() {
     float blankNoise = 0;
 
     for (int i = 0; i < 100; i++) {
-        sensor.start();
+        sensor.start(); //Lines 257-268 are the same as lines 274-285. Why? WSchuler
         while (!sensor.dataReady()) {}
         if(adc.OOR_flag){
           setMsg.data = (100*fluorescence.config.gain) + (10*reference.config.gain) + (scattering.config.gain);
@@ -344,7 +344,7 @@ void loop() {
     sensor.setMode(0);
     break; 
   } 
-// disable modes 14 and 15
+// disable modes 14 and 15 // does this need to be deleted? WSchuler
 	    
 // Record Mode for remote sensor (data)
 case 10: {
@@ -387,8 +387,8 @@ case 10: {
 
       sampleCounter++;                // increment sample counter
       sensor.start();                 // start next collection
-      sensor.writeFile(fluorescence); // write data to SD card
-      sensor.writeFile(raman);
+      sensor.writeFile(fluorescence); // write fluorescence data to SD card WSchuler
+      sensor.writeFile(raman);		// write raman data to SD card WSchuler
       
       #ifndef DEBUG
         fluorPub.publish(&fluorMsg);    // publish fluor on the "fluor_data" ROS topic
@@ -422,7 +422,7 @@ case 10: {
     #endif // DEBUG
     #ifndef DEBUG
     if (millis() > rosTimeout) {
-	nh.spinOnce();
+	nh.spinOnce();	
 	rosTimeout = millis() + ROS_TIMEOUT_DELAY;
     }
     #endif // !DEBUG
