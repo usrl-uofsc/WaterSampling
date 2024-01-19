@@ -1,0 +1,1 @@
+Each file has it's own copy of the Drone_sensor library files (.h and .cpp). Because the library is still in development, each version of the sensor needs to have it's own version of the library. To compile the code for each sensor, make sure that you are using the correct version of the Drone_sensor library.
